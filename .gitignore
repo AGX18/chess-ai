@@ -1,0 +1,30 @@
+# Ignore virtual environment
+venv/
+.venv/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore temporary files
+*.log
+*.tmp
+*.swp
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore build/distribution artifacts
+build/
+dist/
+*.spec
+
+# Ignore compiled game assets (if generated at runtime)
+*.pyg
+*.pyo
