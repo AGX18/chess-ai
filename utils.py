@@ -4,7 +4,7 @@ from const import *
 import chess
 def get_clicked_img(piece):
     """Get the clicked piece image"""
-    image_dir = os.path.join("images", normal_pieces)
+    image_dir = os.path.join("images", clicked_pieces)
     if not os.path.exists(image_dir):
         raise FileNotFoundError(f"Image directory not found: {image_dir}")
     filename = f"{get_piece_name(piece)}.png"

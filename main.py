@@ -42,14 +42,8 @@ class Main:
                 elif event.type == pygame.MOUSEMOTION:
                     if dragger.is_dragging():
                         dragger.update_mouse_position(event.pos)
-                # elif event.type == pygame.MOUSEBUTTONUP:
-                #     pos = event.pos
-                #     col = pos[0] // SQUARE_SIZE
-                #     row = 7 - (pos[1] // SQUARE_SIZE)  # flipped y
-                #     square = chess.square(col, row)
-                #     piece = game.board.piece_at(square)
-                #     if piece and piece.color == chess.WHITE:  # assuming player is White
-                #         print(f"Released {game.board.san(chess.Move(square, square))}")
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    dragger.undrag_piece()
 
             game.draw_board(screen)
             if dragger.is_dragging():
