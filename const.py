@@ -17,3 +17,24 @@ pieces = ['wK', 'wQ', 'wR', 'wB', 'wN', 'wP',
 
 highlighted_squares_light = "#C86464"
 highlighted_squares_dark = "#C84646"
+
+
+
+# for setup screen
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (100, 100, 100)
+GREEN = (0, 200, 0)
+BLUE = (50, 150, 255)
+RED = (200, 50, 50)
+
+
+# Options: 0 = Human, 1 = AI
+player_options = ["Human", "AI"]
+white_choice = 0  # Default: Human
+black_choice = 0  # Default: Human
+
+# Button dimensions
+button_width, button_height = 120, 50
+gap = 20

@@ -1,22 +1,8 @@
-# this will be a class where the ai player takes decision based on the minmax algorithm
-# with alpha-beta pruning and iterative deepening 
-
-# we want to max our score and minimize our opponent score (the other color)
-
-# score is based on the piece and its rating
-# ex.: we have a knight ,a bishop ,a queen and a king left but the other player have a rook and a pawn and a king
-# then our score will be 3 + 3 + 9 + 12 - (5 + 1 + 12) = 9
-# but if it's a checkmate then score will be inf it's against the other player
-# and -inf if it's for us
-
-# Score = (sum of our piece values) – (sum of opponent’s piece values)
-
-
-
 import chess
 
 class ChessAI:
-    def __init__(self, ai_color, max_depth=4):
+    def __init__(self, ai_color, board, max_depth=4):
+        self.board = board
         self.ai_color = ai_color
         self.max_depth = max_depth
         self.piece_values = {
@@ -25,58 +11,85 @@ class ChessAI:
             chess.BISHOP: 3,
             chess.ROOK: 5,
             chess.QUEEN: 9,
-            chess.KING: 12
+            chess.KING: 0  # Never use high king value!
         }
 
-    def evaluate(self, board):
-        # Checkmate
-        if board.is_checkmate():
-            return float("inf") if board.turn != self.ai_color else -float("inf")
-        # Draw
-        if board.is_stalemate() or board.is_insufficient_material():
+    def evaluate(self):
+        """Evaluate from AI's perspective: higher = better for AI."""
+        if self.board.is_checkmate():
+            return -float("inf") if self.board.turn == self.ai_color else float("inf")
+        if self.board.is_stalemate() or self.board.is_insufficient_material():
             return 0
 
         score = 0
         for piece_type, value in self.piece_values.items():
-            score += len(board.pieces(piece_type, self.ai_color)) * value
-            score -= len(board.pieces(piece_type, not self.ai_color)) * value
+            score += len(self.board.pieces(piece_type, self.ai_color)) * value
+            score -= len(self.board.pieces(piece_type, not self.ai_color)) * value
+
+        # If AI is black, flip score so positive = good for AI
+        if self.ai_color == chess.BLACK:
+            score = -score
+
         return score
 
-    def get_move(self, board):
-        """Returns the best move using Alpha-Beta pruning."""
-        _, best_move = self.alpha_beta(board, self.max_depth, -float("inf"), float("inf"), board.turn == self.ai_color)
-        return best_move
+    def order_moves(self, moves):
+        """Prioritize captures to improve pruning."""
+        def score_move(move):
+            if self.board.is_capture(move):
+                captured = self.board.piece_at(move.to_square)
+                attacker = self.board.piece_at(move.from_square)
+                return 10 * (captured.piece_type if captured else 0) - attacker.piece_type
+            return 0
+        return sorted(moves, key=score_move, reverse=True)
 
-    def alpha_beta(self, board, depth, alpha, beta, maximizing):
-        if depth == 0 or board.is_game_over():
-            return self.evaluate(board), None
+    def negamax(self, depth, alpha, beta):
+        """
+        Negamax: always returns score from AI's perspective.
+        No 'maximizing' flag needed.
+        """
+        if depth == 0 or self.board.is_game_over():
+            return self.evaluate()
 
+        best_score = -float("inf")
         best_move = None
-        if maximizing:
-            max_eval = -float("inf")
-            for move in board.legal_moves:
-                board.push(move)
-                eval, _ = self.alpha_beta(board, depth - 1, alpha, beta, False)
-                board.pop()
+        alpha_orig = alpha
 
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = move
-                alpha = max(alpha, eval)
-                if beta <= alpha:
-                    break
-            return max_eval, best_move
-        else:
-            min_eval = float("inf")
-            for move in board.legal_moves:
-                board.push(move)
-                eval, _ = self.alpha_beta(board, depth - 1, alpha, beta, True)
-                board.pop()
+        moves = self.order_moves(list(self.board.legal_moves))
+        for move in moves:
+            self.board.push(move)
+            score = -self.negamax(depth - 1, -beta, -alpha)  # Flip score
+            self.board.pop()
 
-                if eval < min_eval:
-                    min_eval = eval
-                    best_move = move
-                beta = min(beta, eval)
-                if beta <= alpha:
-                    break
-            return min_eval, best_move
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+            alpha = max(alpha, score)
+            if alpha >= beta:  # Beta cutoff
+                break
+
+        # At root, return best move
+        if depth == self.max_depth:
+            self.best_root_move = best_move
+
+        return best_score
+
+    def get_move(self):
+        """Use iterative deepening to find best move."""
+        best_move = None
+
+        legal_moves = list(self.board.legal_moves)
+        if len(legal_moves) == 0:
+            return None
+        if len(legal_moves) == 1:
+            return legal_moves[0]
+
+        # Iterative deepening
+        for depth in range(1, self.max_depth + 1):
+            self.best_root_move = None
+            score = self.negamax(depth, -float("inf"), float("inf"))
+            if self.best_root_move:
+                best_move = self.best_root_move
+            print(f"Depth {depth}: {best_move} (score: {score})")
+
+        return best_move
