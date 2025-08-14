@@ -28,13 +28,19 @@ class Main:
 
     def main_loop(self):
         config = self.setup_loop()
-        white_player = ai_player.ChessAI(chess.WHITE, self.game.board) if config['white'] == 'ai' else None
-        black_player = ai_player.ChessAI(chess.BLACK, self.game.board) if config['black'] == 'ai' else None
         game = self.game
         screen = self.screen
         dragger = self.game.dragger
+        white_player = ai_player.ChessAI(chess.WHITE, game.board) if config['white'] == 'ai' else None
+        black_player = ai_player.ChessAI(chess.BLACK, game.board) if config['black'] == 'ai' else None
         
         while True:
+            if game.board.is_checkmate():
+                winner = "White" if game.board.turn == chess.BLACK else "Black"
+                choice = self.show_checkmate_screen(winner)
+                if choice == "restart":
+                    game.board = chess.Board()  # Reset board
+                    continue  # Restart game loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -167,6 +173,63 @@ class Main:
                             'black': 'human' if black_choice == 0 else 'ai'
                         }
 
+    def show_checkmate_screen(self, winner):
+        screen = self.screen
+        """
+        Display a checkmate screen with winner and options.
+        :param screen: Pygame screen surface
+        :param winner: "White" or "Black"
+        """
+
+        # Fonts
+        font = pygame.font.SysFont("Arial", 70, bold=True)
+        small_font = pygame.font.SysFont("Arial", 40)
+
+        # Buttons
+        play_again_button = pygame.Rect(250, 400, 300, 60)
+        quit_button = pygame.Rect(250, 500, 300, 60)
+
+        clock = pygame.time.Clock()
+        while True:
+            clock.tick(30)
+
+            # Background
+            screen.fill(BLACK)
+
+            # Title
+            title_text = font.render("Checkmate!", True, RED)
+            screen.blit(title_text, (400 - title_text.get_width() // 2, 150))
+
+            # Winner
+            winner_text = font.render(f"{winner} Wins!", True, WHITE)
+            screen.blit(winner_text, (400 - winner_text.get_width() // 2, 230))
+
+            # Buttons
+            pygame.draw.rect(screen, GREEN, play_again_button)
+            pygame.draw.rect(screen, GRAY, quit_button)
+
+            play_text = small_font.render("Play Again", True, WHITE)
+            quit_text = small_font.render("Quit", True, WHITE)
+
+            screen.blit(play_text, (play_again_button.centerx - play_text.get_width() // 2,
+                                    play_again_button.centery - play_text.get_height() // 2))
+            screen.blit(quit_text, (quit_button.centerx - quit_text.get_width() // 2,
+                                    quit_button.centery - quit_text.get_height() // 2))
+
+            pygame.display.flip()
+
+            # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if play_again_button.collidepoint(event.pos):
+                        return "restart"  # Signal to restart the game
+                    elif quit_button.collidepoint(event.pos):
+                        pygame.quit()
+                        sys.exit()
 
 
 main = Main()
