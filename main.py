@@ -39,15 +39,23 @@ class Main:
                         dragger.save_origin_square(chess.square(col, row))
                         dragger.drag_piece(piece)
                         # Store selected square and highlight it
+                        
                 elif event.type == pygame.MOUSEMOTION:
                     if dragger.is_dragging():
                         dragger.update_mouse_position(event.pos)
+
                 elif event.type == pygame.MOUSEBUTTONUP:
+                    if dragger.is_dragging():
+                        row = 7 - (dragger.mouseY // SQUARE_SIZE)
+                        col = dragger.mouseX // SQUARE_SIZE
+                        square = chess.square(col, row)
+                        valid_moves = game.get_piece_valid_moves(dragger.get_origin_square())
+                        if square in [m.to_square for m in valid_moves]:
+                            game.board.push(chess.Move(dragger.get_origin_square(), square))
                     dragger.undrag_piece()
 
             game.draw_board(screen)
-            if dragger.is_dragging():
-                dragger.update_blit(screen)
+           
             pygame.display.update()
             
 

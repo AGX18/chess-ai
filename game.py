@@ -21,6 +21,9 @@ class Game:
                 rect = pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(screen, color, rect)
 
+        if self.dragger.is_dragging():
+            self.highlight_valid_moves(screen, self.dragger.get_origin_square())
+            self.dragger.update_blit(screen)
         self.show_pieces(screen)
 
     def show_pieces(self, screen):
@@ -73,3 +76,27 @@ class Game:
             except pygame.error as e:
                 print(f"Error loading image {path}: {e}")
 
+    def get_piece_valid_moves(self, square):
+        """Get all valid moves for a piece at the given square"""
+        if square is None:
+            return []
+        piece = self.board.piece_at(square)
+        if piece is None:
+            return []
+
+        # Get all legal moves for the piece
+        legal_moves = []
+        for move in self.board.legal_moves:
+            if move.from_square == square:
+                legal_moves.append(move)
+
+        return legal_moves
+
+    def highlight_valid_moves(self, screen, square):
+        """Highlight all valid moves for a piece at the given square"""
+        valid_moves = self.get_piece_valid_moves(square)
+        for move in valid_moves:
+            col = chess.square_file(move.to_square)
+            row = 7 - chess.square_rank(move.to_square)  # Flip Y for correct orientation
+            rect = pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+            pygame.draw.rect(screen, highlighted_squares_light if (row + col) % 2 == 0 else highlighted_squares_dark, rect)

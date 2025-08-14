@@ -15,3 +15,5 @@ pieces = ['wK', 'wQ', 'wR', 'wB', 'wN', 'wP',
           'bK', 'bQ', 'bR', 'bB', 'bN', 'bP']
 
 
+highlighted_squares_light = "#C86464"
+highlighted_squares_dark = "#C84646"
