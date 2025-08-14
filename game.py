@@ -26,6 +26,9 @@ class Game:
     def show_pieces(self, screen):
         """Draw all pieces on the board"""
         for square in chess.SQUARES:
+            if self.dragger.is_dragging():
+                if square == self.dragger.get_origin_square():
+                    continue
             piece = self.board.piece_at(square)
             if piece is not None:
                 color = 'w' if piece.color == chess.WHITE else 'b'
@@ -50,7 +53,7 @@ class Game:
                   'bK', 'bQ', 'bR', 'bB', 'bN', 'bP']
         
         # Ensure the images directory exists
-        image_dir = os.path.join("images", "imgs-80px")
+        image_dir = os.path.join("images", normal_pieces)
         if not os.path.exists(image_dir):
             raise FileNotFoundError(f"Image directory not found: {image_dir}")
 
@@ -69,3 +72,4 @@ class Game:
                 self.IMAGES[piece] = img
             except pygame.error as e:
                 print(f"Error loading image {path}: {e}")
+
