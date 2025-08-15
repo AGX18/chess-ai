@@ -72,6 +72,7 @@ class Main:
         while True:
             if game.board.is_checkmate() or game.board.is_game_over() or game.board.can_claim_fifty_moves():
                 result = game.board.result()
+                print(result)
                 winner = "Draw"
                 if result == "1-0":
                     winner = "White"

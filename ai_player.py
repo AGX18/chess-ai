@@ -1,6 +1,6 @@
 import chess
 import random
-
+import time
 class ChessAI:
     def __init__(self, ai_color, board : chess.Board, max_depth=4):
         self.board = board
@@ -17,6 +17,8 @@ class ChessAI:
         self.best_move = None
 
     def get_move(self):
+        start_time = time.time()
+
         self.maximize(self.max_depth, -float('inf'), float('inf'))
         if self.best_move == None:
             legal_moves = list(self.board.legal_moves)
@@ -26,6 +28,7 @@ class ChessAI:
             self.best_move = random.choice(legal_moves)
         best_move = self.best_move
         self.best_move = None
+        self.logging(start_time)
         return best_move
 
     def maximize(self, depth, alpha, beta) -> float:
@@ -81,3 +84,12 @@ class ChessAI:
         if self.board.is_repetition(3):
             my_score -= 0.5  # discourage repeating positions
         return my_score - opponent_score + noise
+
+
+    def logging(self, start_time):
+        end_time = time.time()
+
+        # Calculate difference
+        elapsed_time = end_time - start_time
+        print("White" if self.board.turn == chess.WHITE else "Black")
+        print(f"time needed for ai without move ordering: {elapsed_time:.4f} seconds")

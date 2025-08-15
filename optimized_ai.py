@@ -1,5 +1,6 @@
 from ai_player import ChessAI
 import chess
+import time
 class OptimizedAI(ChessAI):
     def __init__(self, ai_color, board : chess.Board, max_depth=4):
         super().__init__(ai_color, board, max_depth)
@@ -94,7 +95,14 @@ class OptimizedAI(ChessAI):
         return beta
     
 
+    
+    def logging(self, start_time):
+        end_time = time.time()
 
+        # Calculate difference
+        elapsed_time = end_time - start_time
+        print("White" if self.board.turn == chess.WHITE else "Black")
+        print(f"time needed for ai with move ordering: {elapsed_time:.4f} seconds")
     
 
 
