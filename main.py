@@ -40,16 +40,23 @@ class Main:
         self.set_ai_depth
 
     def set_white_player(self):
-        if self.config['white'] == 'ai':
-            self.white_player = OptimizedAI(chess.WHITE, self.game.board, ai_depth)
-        elif self.config['white'] == 'random':
+        choice = self.config['white']
+        if choice == 'ai':
+            self.white_player = ai_player.ChessAI(chess.WHITE, self.game.board, ai_depth)
+        elif choice == 'random':
             self.white_player = RandomAgent(chess.WHITE, self.game.board)
+        elif choice == 'optimized':
+            self.white_player = OptimizedAI(chess.WHITE, self.game.board)
             
     def set_black_player(self):
-        if self.config['black'] == 'ai':
+        choice = self.config['black']
+        if choice == 'ai':
             self.black_player = ai_player.ChessAI(chess.BLACK, self.game.board, ai_depth)
-        elif self.config['black'] == 'random':
+        elif choice == 'random':
             self.black_player = RandomAgent(chess.BLACK, self.game.board)
+        elif choice == 'optimized':
+            self.black_player = OptimizedAI(chess.BLACK, self.game.board)
+
     
     def set_ai_depth(self):
         self.ai_depth = self.config["ai_depth"] # depth used in ai_player
