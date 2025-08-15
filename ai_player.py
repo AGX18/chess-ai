@@ -1,4 +1,5 @@
 import chess
+import random
 
 class ChessAI:
     def __init__(self, ai_color, board : chess.Board, max_depth=4):
@@ -17,13 +18,21 @@ class ChessAI:
 
     def get_move(self):
         self.maximize(self.max_depth, -float('inf'), float('inf'))
-        return self.best_move
+        if self.best_move == None:
+            legal_moves = list(self.board.legal_moves)
+            if not legal_moves:
+                print("No legal moves!")
+                return None
+            self.best_move = random.choice(legal_moves)
+        best_move = self.best_move
+        self.best_move = None
+        return best_move
 
-    def maximize(self, depth, alpha, beta):
+    def maximize(self, depth, alpha, beta) -> float:
         if depth == 0:
             return self.get_board_rating()
         
-        legal_moves = self.board.legal_moves
+        legal_moves = list(self.board.legal_moves)
 
         for move in legal_moves:
             self.board.push(move)
@@ -41,7 +50,7 @@ class ChessAI:
         return alpha
 
 
-    def minimize(self, depth, alpha, beta) -> int:
+    def minimize(self, depth, alpha, beta) -> float:
         # TODO: implement minimize in alpha beta prunning algorithm
         if depth == 0:
             return self.get_board_rating()
@@ -68,4 +77,7 @@ class ChessAI:
             my_score += len(self.board.pieces(piece_type, self.ai_color)) * value
             opponent_score += len(self.board.pieces(piece_type, not self.ai_color)) * value
 
-        return my_score - opponent_score
+        noise = random.uniform(-0.1, 0.1)
+        if self.board.is_repetition(3):
+            my_score -= 0.5  # discourage repeating positions
+        return my_score - opponent_score + noise

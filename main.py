@@ -6,6 +6,8 @@ from const import *
 from game import Game
 import chess
 from random_agent import RandomAgent
+from optimized_ai import OptimizedAI
+import stalemate
 
 class Main:
     # Fonts
@@ -15,7 +17,11 @@ class Main:
         SETUP_WIDTH, SETUP_HEIGHT = 900, 700
         self.screen = pygame.display.set_mode((SETUP_WIDTH, SETUP_HEIGHT))
         self.game = Game()
-
+        # self.non_move = 0
+        self.white_player = None
+        self.black_player = None
+        self.config = self.setup_loop()
+        self.set_options()
         pygame.display.set_caption("Chess AI")
 
     def start_screen(self):
@@ -28,40 +34,64 @@ class Main:
         pygame.display.flip()
         pygame.time.wait(2000)  # Show start screen for 2 seconds
 
+    def set_options(self):
+        self.set_white_player()
+        self.set_black_player()
+        self.set_ai_depth
+
+    def set_white_player(self):
+        if self.config['white'] == 'ai':
+            self.white_player = OptimizedAI(chess.WHITE, self.game.board, ai_depth)
+        elif self.config['white'] == 'random':
+            self.white_player = RandomAgent(chess.WHITE, self.game.board)
+            
+    def set_black_player(self):
+        if self.config['black'] == 'ai':
+            self.black_player = ai_player.ChessAI(chess.BLACK, self.game.board, ai_depth)
+        elif self.config['black'] == 'random':
+            self.black_player = RandomAgent(chess.BLACK, self.game.board)
+    
+    def set_ai_depth(self):
+        self.ai_depth = self.config["ai_depth"] # depth used in ai_player
+
+
+
     def main_loop(self):
-        config = self.setup_loop()
         # change the height and width of the screen to the ones used in the chess game
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.ai_depth = config["ai_depth"] # depth used in ai_player
         game = self.game
         screen = self.screen
         dragger = self.game.dragger
-        white_player = None
-        black_player = None
-        if config['white'] == 'ai':
-            white_player = ai_player.ChessAI(chess.WHITE, game.board, ai_depth)
-        elif config['white'] == 'random':
-            white_player = RandomAgent(chess.WHITE, game.board)
-
-        if config['black'] == 'ai':
-            black_player = ai_player.ChessAI(chess.BLACK, game.board, ai_depth)
-        elif config['black'] == 'random':
-            black_player = RandomAgent(chess.BLACK, game.board)
-
-
         while True:
-            if game.board.is_checkmate():
-                winner = "White" if game.board.turn == chess.BLACK else "Black"
+            if game.board.is_checkmate() or game.board.is_game_over() or game.board.can_claim_fifty_moves():
+                result = game.board.result()
+                winner = "Draw"
+                if result == "1-0":
+                    winner = "White"
+                elif result == "0-1":
+                    winner = "Black"
+                # winner = "White" if game.board.turn == chess.BLACK else "Black"
                 choice = self.show_checkmate_screen(winner)
                 if choice == "restart":
                     game.board = chess.Board()  # Reset board
+                    self.set_options()
                     continue  # Restart game loop
+            elif game.board.is_stalemate() or len(list(game.board.legal_moves)) == 0:
+                print("stalemate")
+                result = stalemate.show_stalemate_screen(screen, game.board)
+                if result == 'restart':
+                    board = chess.Board()  # New game
+                elif result == 'menu':
+                    self.config = self.setup_loop()
+                    self.set_options()
+                else:
+                    pygame.quit()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and ((white_player is None and game.board.turn == chess.WHITE) or (black_player is None and game.board.turn == chess.BLACK)):
+                elif event.type == pygame.MOUSEBUTTONDOWN and ((self.white_player is None and game.board.turn == chess.WHITE) or (self.black_player is None and game.board.turn == chess.BLACK)):
                     dragger.update_mouse_position(event.pos)
                     row = 7 - (dragger.mouseY // SQUARE_SIZE)  # flipped y
                     col = dragger.mouseX // SQUARE_SIZE
@@ -95,14 +125,15 @@ class Main:
             game.draw_board(screen)
             pygame.display.update()
 
+            
             # if ai player's turn
-            if white_player and game.board.turn == chess.WHITE:
-                move = white_player.get_move()
-                if move:
+            if self.white_player and game.board.turn == chess.WHITE:
+                move = self.white_player.get_move()
+                if move and move in game.board.legal_moves:
                     game.board.push(move)
-            elif black_player and game.board.turn == chess.BLACK:
-                move = black_player.get_move()
-                if move:
+            elif self.black_player and game.board.turn == chess.BLACK:
+                move = self.black_player.get_move()
+                if move and move in game.board.legal_moves:
                     game.board.push(move)
 
 
@@ -248,11 +279,19 @@ class Main:
             screen.fill(BLACK)
 
             # Title
-            title_text = font.render("Checkmate!", True, RED)
+            if winner != "Draw":
+                title_text = font.render("Checkmate!", True, RED)
+            else:
+                title_text = font.render("Tie!", True, RED)
+
             screen.blit(title_text, (400 - title_text.get_width() // 2, 150))
 
             # Winner
-            winner_text = font.render(f"{winner} Wins!", True, WHITE)
+            if winner != "Draw":
+                winner_text = font.render(f"{winner} Wins!", True, WHITE)
+            else:
+                winner_text = font.render(f"Nobody won!", True, WHITE)
+
             screen.blit(winner_text, (400 - winner_text.get_width() // 2, 230))
 
             # Buttons
