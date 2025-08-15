@@ -100,3 +100,20 @@ class Game:
             row = 7 - chess.square_rank(move.to_square)  # Flip Y for correct orientation
             rect = pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(screen, highlighted_squares_light if (row + col) % 2 == 0 else highlighted_squares_dark, rect)
+
+    def get_board_rating(self, color):
+        piece_values = {
+            chess.PAWN: 1,
+            chess.KNIGHT: 3,
+            chess.BISHOP: 3,
+            chess.ROOK: 5,
+            chess.QUEEN: 9,
+            chess.KING: 0  # Never use high king value!
+        }
+        my_score  = 0
+        opponent_score  = 0
+        for piece_type, value in piece_values.items():
+            my_score += len(self.board.pieces(piece_type, color)) * value
+            opponent_score += len(self.board.pieces(piece_type, not color)) * value
+
+        return my_score - opponent_score

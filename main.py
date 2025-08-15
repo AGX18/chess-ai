@@ -74,6 +74,8 @@ class Main:
                         if square in [m.to_square for m in valid_moves]:
                             from_square = dragger.get_origin_square()
                             if from_square:
+                                v = game.get_board_rating(chess.WHITE) if game.board.turn == chess.WHITE else game.get_board_rating(chess.BLACK)
+                                print("white rating" if game.board.turn == chess.WHITE else "black rating", v)
                                 game.board.push(chess.Move(from_square, square))
                     dragger.undrag_piece()
 
