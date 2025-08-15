@@ -12,7 +12,8 @@ class Main:
 
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        SETUP_WIDTH, SETUP_HEIGHT = 900, 700
+        self.screen = pygame.display.set_mode((SETUP_WIDTH, SETUP_HEIGHT))
         self.game = Game()
 
         pygame.display.set_caption("Chess AI")
@@ -29,18 +30,21 @@ class Main:
 
     def main_loop(self):
         config = self.setup_loop()
+        # change the height and width of the screen to the ones used in the chess game
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.ai_depth = config["ai_depth"] # depth used in ai_player
         game = self.game
         screen = self.screen
         dragger = self.game.dragger
         white_player = None
         black_player = None
         if config['white'] == 'ai':
-            white_player = ai_player.ChessAI(chess.WHITE, game.board)
+            white_player = ai_player.ChessAI(chess.WHITE, game.board, ai_depth)
         elif config['white'] == 'random':
             white_player = RandomAgent(chess.WHITE, game.board)
 
         if config['black'] == 'ai':
-            black_player = ai_player.ChessAI(chess.BLACK, game.board)
+            black_player = ai_player.ChessAI(chess.BLACK, game.board, ai_depth)
         elif config['black'] == 'random':
             black_player = RandomAgent(chess.BLACK, game.board)
 
@@ -103,55 +107,82 @@ class Main:
 
 
     def setup_loop(self):
+        # Button dimensions
+        button_width, button_height = 140, 50
+        gap = 25
+        start_button = pygame.Rect(WIDTH // 2 - 100, 580, 200, 60)
+        depth_left = pygame.Rect(WIDTH // 2 - 100 - 50, 500, 50, 50)   # '<'
+        depth_right = pygame.Rect(WIDTH // 2 + 100, 500, 50, 50)       # '>'
+        # Fonts
         title_font = pygame.font.SysFont("Arial", 60, bold=True)
         label_font = pygame.font.SysFont("Arial", 40)
         option_font = pygame.font.SysFont("Arial", 36)
-        start_button = pygame.Rect(WIDTH // 2 - 100, 450, 200, 60)
+        small_font = pygame.font.SysFont("Arial", 30)
         screen = self.screen
         def draw_setup_screen():
-            screen.fill((30, 30, 40))  # Dark background
-            
+            screen.fill(DARK_GRAY)
 
             # Title
             title = title_font.render("Chess Setup", True, WHITE)
             screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 60))
 
-            # Instructions
+            # Subtitle
             instr = label_font.render("Choose Player Types", True, GRAY)
             screen.blit(instr, (WIDTH // 2 - instr.get_width() // 2, 130))
 
-            # White player
+            # === White Player ===
             white_label = label_font.render("White:", True, WHITE)
-            screen.blit(white_label, (WIDTH // 2 - 200, 220))
+            screen.blit(white_label, (WIDTH // 2 - 250, 220))
 
-            # White buttons
-            for i, option in enumerate(player_options):
+            for i in range(len(player_types)):
                 color = GREEN if i == white_choice else GRAY
                 rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 220, button_width, button_height))
                 pygame.draw.rect(screen, color, rect)
-                text = option_font.render(option, True, WHITE)
+                text = option_font.render(player_types[i], True, WHITE)
                 screen.blit(text, (rect.centerx - text.get_width() // 2, rect.centery - text.get_height() // 2))
 
-            # Black player
+            # === Black Player ===
             black_label = label_font.render("Black:", True, WHITE)
-            screen.blit(black_label, (WIDTH // 2 - 200, 300))
+            screen.blit(black_label, (WIDTH // 2 - 250, 300))
 
-            # Black buttons
-            for i, option in enumerate(player_options):
+            for i in range(len(player_types)):
                 color = GREEN if i == black_choice else GRAY
                 rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 300, button_width, button_height))
                 pygame.draw.rect(screen, color, rect)
-                text = option_font.render(option, True, WHITE)
+                text = option_font.render(player_types[i], True, WHITE)
                 screen.blit(text, (rect.centerx - text.get_width() // 2, rect.centery - text.get_height() // 2))
 
-            # Start Game Button
-            pygame.draw.rect(screen, BLUE, start_button)
+            # === AI Depth Control ===
+            depth_label = label_font.render("AI Search Depth:", True, WHITE)
+            screen.blit(depth_label, (WIDTH // 2 - depth_label.get_width() // 2, 400))
+
+            # Depth display
+            depth_value = small_font.render(f"{ai_depth}", True, HIGHLIGHT)
+            value_rect = pygame.Rect(WIDTH // 2 - 30, 510, 60, 30)
+            pygame.draw.rect(screen, BLUE, value_rect, border_radius=8)
+            screen.blit(depth_value, (value_rect.centerx - depth_value.get_width() // 2,
+                                    value_rect.centery - depth_value.get_height() // 2))
+
+            # Arrows
+            left_arrow = small_font.render("<", True, WHITE)
+            right_arrow = small_font.render(">", True, WHITE)
+            pygame.draw.rect(screen, RED, depth_left, border_radius=10)
+            pygame.draw.rect(screen, RED, depth_right, border_radius=10)
+            screen.blit(left_arrow, (depth_left.centerx - left_arrow.get_width() // 2,
+                                    depth_left.centery - left_arrow.get_height() // 2))
+            screen.blit(right_arrow, (depth_right.centerx - right_arrow.get_width() // 2,
+                                    depth_right.centery - right_arrow.get_height() // 2))
+
+            # Start Button
+            pygame.draw.rect(screen, BLUE, start_button, border_radius=12)
             start_text = label_font.render("Start Game", True, WHITE)
             screen.blit(start_text, (start_button.centerx - start_text.get_width() // 2,
                                     start_button.centery - start_text.get_height() // 2))
 
             pygame.display.flip()
-        global white_choice, black_choice
+
+        # now the function that calls it
+        global white_choice, black_choice, ai_depth
         clock = pygame.time.Clock()
 
         while True:
@@ -166,25 +197,32 @@ class Main:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = event.pos
 
-                    # Check White options
-                    for i in range(2):
+                    # White options
+                    for i in range(len(player_types)):
                         rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 220, button_width, button_height))
                         if rect.collidepoint(mouse_pos):
                             white_choice = i
 
-                    # Check Black options
-                    for i in range(2):
+                    # Black options
+                    for i in range(len(player_types)):
                         rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 300, button_width, button_height))
                         if rect.collidepoint(mouse_pos):
                             black_choice = i
 
-                    # Check Start button
+                    # Depth controls
+                    if depth_left.collidepoint(mouse_pos):
+                        ai_depth = max(1, ai_depth - 1)
+                    if depth_right.collidepoint(mouse_pos):
+                        ai_depth = min(5, ai_depth + 1)
+
+                    # Start Game
                     if start_button.collidepoint(mouse_pos):
-                        # Return the choices: e.g., {'white': 'human', 'black': 'ai'}
                         return {
-                            'white': 'human' if white_choice == 0 else 'ai',
-                            'black': 'human' if black_choice == 0 else 'ai'
+                            'white': player_types[white_choice].lower(),
+                            'black': player_types[black_choice].lower(),
+                            'ai_depth': ai_depth
                         }
+
 
     def show_checkmate_screen(self, winner):
         screen = self.screen
