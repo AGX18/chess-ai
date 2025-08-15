@@ -12,7 +12,7 @@ class ChessAI:
             chess.BISHOP: 3,
             chess.ROOK: 5,
             chess.QUEEN: 9,
-            chess.KING: 0  # Never use high king value!
+            chess.KING: 10000  
         }
         self.best_move = None
 

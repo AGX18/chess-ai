@@ -73,6 +73,7 @@ class Main:
             if game.board.is_checkmate() or game.board.is_game_over() or game.board.can_claim_fifty_moves():
                 result = game.board.result()
                 print(result)
+                print("number of moves:", game.board.fullmove_number)
                 winner = "Draw"
                 if result == "1-0":
                     winner = "White"
@@ -86,6 +87,7 @@ class Main:
                     continue  # Restart game loop
             elif game.board.is_stalemate() or len(list(game.board.legal_moves)) == 0:
                 print("stalemate")
+                print("number of moves:", game.board.fullmove_number)
                 result = stalemate.show_stalemate_screen(screen, game.board)
                 if result == 'restart':
                     board = chess.Board()  # New game
