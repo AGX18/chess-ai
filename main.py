@@ -14,8 +14,8 @@ class Main:
 
     def __init__(self):
         pygame.init()
-        SETUP_WIDTH, SETUP_HEIGHT = 900, 700
-        self.screen = pygame.display.set_mode((SETUP_WIDTH, SETUP_HEIGHT))
+        self.SETUP_WIDTH, self.SETUP_HEIGHT = 1400, 800
+        self.screen = pygame.display.set_mode((self.SETUP_WIDTH, self.SETUP_HEIGHT))
         self.game = Game()
         # self.non_move = 0
         self.white_player = None
@@ -139,7 +139,9 @@ class Main:
 
     def setup_loop(self):
         # Button dimensions
-        button_width, button_height = 140, 50
+        button_width, button_height = 200, 50
+        WIDTH = self.SETUP_WIDTH
+        HEIGHT = self.SETUP_HEIGHT
         gap = 25
         start_button = pygame.Rect(WIDTH // 2 - 100, 580, 200, 60)
         depth_left = pygame.Rect(WIDTH // 2 - 100 - 50, 500, 50, 50)   # '<'
@@ -163,22 +165,22 @@ class Main:
 
             # === White Player ===
             white_label = label_font.render("White:", True, WHITE)
-            screen.blit(white_label, (WIDTH // 2 - 250, 220))
+            screen.blit(white_label, (WIDTH // 3 - 250, 220))
 
             for i in range(len(player_types)):
                 color = GREEN if i == white_choice else GRAY
-                rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 220, button_width, button_height))
+                rect = pygame.Rect((WIDTH // 3 - 60 + i * (button_width + gap), 220, button_width, button_height))
                 pygame.draw.rect(screen, color, rect)
                 text = option_font.render(player_types[i], True, WHITE)
                 screen.blit(text, (rect.centerx - text.get_width() // 2, rect.centery - text.get_height() // 2))
 
             # === Black Player ===
             black_label = label_font.render("Black:", True, WHITE)
-            screen.blit(black_label, (WIDTH // 2 - 250, 300))
+            screen.blit(black_label, (WIDTH // 3 - 250, 300))
 
             for i in range(len(player_types)):
                 color = GREEN if i == black_choice else GRAY
-                rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 300, button_width, button_height))
+                rect = pygame.Rect((WIDTH // 3 - 60 + i * (button_width + gap), 300, button_width, button_height))
                 pygame.draw.rect(screen, color, rect)
                 text = option_font.render(player_types[i], True, WHITE)
                 screen.blit(text, (rect.centerx - text.get_width() // 2, rect.centery - text.get_height() // 2))
@@ -230,13 +232,13 @@ class Main:
 
                     # White options
                     for i in range(len(player_types)):
-                        rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 220, button_width, button_height))
+                        rect = pygame.Rect((WIDTH // 3 - 60 + i * (button_width + gap), 220, button_width, button_height))
                         if rect.collidepoint(mouse_pos):
                             white_choice = i
 
                     # Black options
                     for i in range(len(player_types)):
-                        rect = pygame.Rect((WIDTH // 2 - 60 + i * (button_width + gap), 300, button_width, button_height))
+                        rect = pygame.Rect((WIDTH // 3 - 60 + i * (button_width + gap), 300, button_width, button_height))
                         if rect.collidepoint(mouse_pos):
                             black_choice = i
 

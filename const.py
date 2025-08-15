@@ -34,7 +34,7 @@ HIGHLIGHT = (0, 180, 255)
 # Options: 0 = Human, 1 = AI
 
 # Player options
-player_types = ["Human", "AI", "Random"]
+player_types = ["Human", "AI", "Random", "Optimized"]
 white_choice = 0  # Human
 black_choice = 0  # Human
 ai_depth = 4  # Default depth for AI (random & human ignore this)
