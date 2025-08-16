@@ -8,19 +8,17 @@ class OptimizedAI(ChessAI):
         # History heuristic: history[from_square][to_square]
         self.history = [[0] * 64 for _ in range(64)]  # 64 squares
     
-    def order_moves(self):
+    def order_moves(self, depth):
         """
         Returns a list of moves sorted by estimated value (best first).
         """
         board = self.board
-        depth = self.max_depth
         moves = list(board.legal_moves)
         scored_moves = []
 
         for move in moves:
             score = 0
 
-            # 1. PV Move: Not implemented here (needs transposition table)
             # 2. Captures with MVV-LVA
             if board.is_capture(move):
                 captured = board.piece_at(move.to_square)
@@ -28,7 +26,7 @@ class OptimizedAI(ChessAI):
                 # MVV-LVA: high value captured, low value attacker → better
                 if captured and attacker:
                     score += 10 * (captured.piece_type if captured else 0) - attacker.piece_type
-                    score += 1000  # Base capture bonus
+                    score += 100  # Base capture bonus
 
 
             # 4. Killer Moves
@@ -39,7 +37,7 @@ class OptimizedAI(ChessAI):
 
             # 5. History Heuristic
             score += self.history[move.from_square][move.to_square]
-
+            
             # 6. Check
             board.push(move)
             if board.is_check():
@@ -50,13 +48,14 @@ class OptimizedAI(ChessAI):
 
         # Sort by score, descending
         scored_moves.sort(key=lambda x: x[0], reverse=True)
+
         return [move for score, move in scored_moves]
     
     def maximize(self, depth, alpha, beta) -> float:
         if depth == 0:
             return self.get_board_rating()
         
-        legal_moves = self.order_moves()
+        legal_moves = self.order_moves(depth)
 
         for move in legal_moves:
             self.board.push(move)
@@ -69,6 +68,10 @@ class OptimizedAI(ChessAI):
                     self.best_move = move
 
             if alpha >= beta:
+                # Killer move update
+                if self.killer_moves[depth][0] != move:
+                    self.killer_moves[depth][1] = self.killer_moves[depth][0]
+                    self.killer_moves[depth][0] = move
                 break
         
         return alpha
@@ -79,7 +82,7 @@ class OptimizedAI(ChessAI):
         if depth == 0:
             return self.get_board_rating()
         
-        legal_moves = self.order_moves()
+        legal_moves = self.order_moves(depth)
 
         for move in legal_moves:
             self.board.push(move)
@@ -90,6 +93,10 @@ class OptimizedAI(ChessAI):
                 beta = rating
 
             if beta <= alpha:
+                # Killer move update
+                if self.killer_moves[depth][0] != move:
+                    self.killer_moves[depth][1] = self.killer_moves[depth][0]
+                    self.killer_moves[depth][0] = move
                 break                    
         
         return beta

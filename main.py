@@ -42,7 +42,7 @@ class Main:
     def set_white_player(self):
         choice = self.config['white']
         if choice == 'ai':
-            self.white_player = ai_player.ChessAI(chess.WHITE, self.game.board, ai_depth)
+            self.white_player = ai_player.ChessAI(chess.WHITE, self.game.board)
         elif choice == 'random':
             self.white_player = RandomAgent(chess.WHITE, self.game.board)
         elif choice == 'optimized':
@@ -51,7 +51,7 @@ class Main:
     def set_black_player(self):
         choice = self.config['black']
         if choice == 'ai':
-            self.black_player = ai_player.ChessAI(chess.BLACK, self.game.board, ai_depth)
+            self.black_player = ai_player.ChessAI(chess.BLACK, self.game.board)
         elif choice == 'random':
             self.black_player = RandomAgent(chess.BLACK, self.game.board)
         elif choice == 'optimized':

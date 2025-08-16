@@ -37,7 +37,7 @@ HIGHLIGHT = (0, 180, 255)
 player_types = ["Human", "AI", "Random", "Optimized"]
 white_choice = 0  # Human
 black_choice = 0  # Human
-ai_depth = 4  # Default depth for AI (random & human ignore this)
+ai_depth = 12  # Default depth for AI (random & human ignore this)
 
 # Button dimensions
 button_width, button_height = 140, 50
