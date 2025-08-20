@@ -68,6 +68,7 @@ class OptimizedAI(ChessAI):
                     self.best_move = move
 
             if alpha >= beta:
+                self.history[move.from_square][move.to_square] += depth * depth
                 # Killer move update
                 if self.killer_moves[depth][0] != move:
                     self.killer_moves[depth][1] = self.killer_moves[depth][0]
@@ -93,6 +94,7 @@ class OptimizedAI(ChessAI):
                 beta = rating
 
             if beta <= alpha:
+                self.history[move.from_square][move.to_square] += depth * depth
                 # Killer move update
                 if self.killer_moves[depth][0] != move:
                     self.killer_moves[depth][1] = self.killer_moves[depth][0]
